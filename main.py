@@ -4,6 +4,7 @@ import time
 inventory = []
 hp = 100
 rooms_passed = 0
+won_game = False
 
 while True:
     action = input("Что делаешь? (искать / лечиться / ворота / сдаться): ").lower()
@@ -15,31 +16,40 @@ while True:
     elif action == "искать":
         rooms_passed += 1
         hp_lost = random.randint(10, 25)
-        hp -= hp_lost
-        print(f"Осталось здоровья: {hp} | Инвентарь: {inventory}")
-        
-        if hp <= 0:
-            print("Провалено.. Здоровье закончилось.")
-            break
-        else:
+        monster_roll = random.randint(1, 10)
+               
+        if hp > 0:
             print("Обыскиваешь комнату...")
             time.sleep(2)
-            item_found = random.randint(1, 3)
-            if item_found == 1:
-                print("Ты нашел чип!")
-                inventory.append("чип")
-            elif item_found == 2:
-                print("Ого, среди хлама нашлась аптечка! (+30 HP)")
-                inventory.append("аптечка")
+           
+            if monster_roll == 2:
+                print("Здесь монстр! Он ранил тебя..")
+                monster_damage = random.randint(30, 45)
+                hp = max(0, hp - monster_damage)
+                print(f"Осталось здоровья: {hp} | Инвентарь: {inventory}")
+                if hp <= 0:
+                    print("Здоровье закончилось..")
+                    break
             else:
-                print("Ничего интересного, только старый хлам.")
+                item_found = random.randint(1, 3)
+                hp = max(0, hp - hp_lost)
+                if hp <= 0:
+                    print("Здоровье закончилось..")
+                    break
+                print(f"Осталось здоровья: {hp} | Инвентарь: {inventory}")
+                if item_found == 1:
+                    print("Ты нашел чип!")
+                    inventory.append("чип")
+                elif item_found == 2:
+                    print("Ого, среди хлама нашлась аптечка!")
+                    inventory.append("аптечка")
+                else:
+                    print("Ничего интересного, только старый хлам.")
                 
     elif action == "лечиться":
         if "аптечка" in inventory:
             inventory.remove("аптечка")
-            hp += 30
-            if hp > 100: 
-                hp = 100
+            hp = min(100, hp + 20)
             print(f"Ты использовал аптечку. Здоровье восстановлено до {hp}!")
         else:
             print("У тебя нет аптечек! Ищи внимательнее в комнатах.")
@@ -52,14 +62,15 @@ while True:
             print(" ДВЕРИ ОТКРЫВАЮТСЯ... СВЕЖИЙ ВОЗДУХ!")
             print(f" ТЫ УСПЕШНО СБЕЖАЛ ЗА {rooms_passed} КОМНАТ(Ы)!")
             print("========================================")
+            won_game = True
             break
         else:
             print("Ищи 3 чипа, у тебя недостаточно.")
             
     else:
-        print("Неизвестная команда! Пиши: искать, лечиться, ворота или сдаться")
+        print("Неизвестная команда! Пиши: искать / лечиться / ворота / сдаться")
 
-if hp <= 0 or action == "сдаться":
+if not won_game:
     print("\n" + "="*40)
     print(" ИГРА ОКОНЧЕНА. БУНКЕР ЗАБРАЛ ЕЩЕ ОДНУ ЖИЗНЬ...")
     print("="*40)
